@@ -1,5 +1,5 @@
 from app import db
-from models import BlogPost
+from models import BlogPost, User
 
 db.drop_all()
 db.create_all()

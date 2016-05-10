@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request, session, flash, g
 from functools import wraps
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.bcrypt import Bcrypt
 import os
 # import sqlite3
 
@@ -9,6 +10,7 @@ app.database = 'sample.db'
 app.config.from_object(os.environ['APP_SETTINGS'])
 print os.environ['APP_SETTINGS']
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
 
 from models import *
 

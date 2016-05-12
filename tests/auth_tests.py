@@ -1,47 +1,69 @@
-from project import app
 import unittest
+from flask.ext.testing import TestCase
+from project import app, db
+from project.models import User, BlogPost
 
-class FlaskTestCase(unittest.TestCase):
+class BaseTestCase(TestCase):
+    def create_app(self):
+        app.config.from_object('config.TestConfig')
+        return app
 
     def setUp(self):
-        self.tester = app.test_client(self)
+        # self.tester = app.test_client(self)
         self.good_cred = dict(username='admin', password='admin')
         self.bad_cred = dict(username='buttts', password='farts')
+        db.create_all()
+        db.session.add(BlogPost('Test post', 'This is a test. Only a test.'))
+        db.session.add(User('admin', 'ad@min.com', 'admin'))
+        db.session.commit()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        pass
+
+
+class FlaskTestCase(BaseTestCase):
+
+    # def setUp(self):
+    #     self.tester = app.test_client(self)
+    #     self.good_cred = dict(username='admin', password='admin')
+    #     self.bad_cred = dict(username='buttts', password='farts')
 
     def test_login_good_auth(self):
-        response = self.tester.post(
+        response = self.client.post(
             '/login', data=self.good_cred,
             follow_redirects= True)
         self.assertIn(b'log in successful', response.data)
         self.assertEqual(response.status_code, 200)
 
     def test_login_bad_auth(self):
-        response = self.tester.post('/login', data=self.bad_cred, follow_redirects= True)
+        response = self.client.post('/login', data=self.bad_cred, follow_redirects= True)
         self.assertIn(b'Invalid credentials', response.data)
         self.assertEqual(response.status_code, 200)
 
     def test_logout_valid(self):
-        self.tester.post(
+        self.client.post(
             '/login', data=self.good_cred,
             follow_redirects= True)
-        response = self.tester.get('/logout', content_type = 'html/text',follow_redirects= True)
+        response = self.client.get('/logout', content_type = 'html/text',follow_redirects= True)
         self.assertEqual(response.status_code, 200)
         self.assertIn('successful', response.data)
 
     def test_logout_protected(self):
-        response = self.tester.get('/logout', content_type = 'html/text',follow_redirects= True)
+        response = self.client.get('/logout', content_type = 'html/text',follow_redirects= True)
         self.assertEqual(response.status_code, 200)
         self.assertIn('need to login', response.data)
 
     def test_home_valid_if_authed(self):
-        self.tester.post(
+        self.client.post(
             '/login', data=self.good_cred,
             follow_redirects= True)
-        response = self.tester.get('/', content_type = 'html/text')
+        response = self.client.get('/', content_type = 'html/text')
         self.assertEqual(response.status_code, 200)
 
     def test_home_protected(self):
-        response = self.tester.get('/', content_type = 'html/text', follow_redirects=True)
+        response = self.client.get('/', content_type = 'html/text', follow_redirects=True)
         self.assertIn('need to login', response.data)
 
 

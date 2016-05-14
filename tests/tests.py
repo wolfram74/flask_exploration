@@ -55,7 +55,7 @@ class FlaskTestCase(BaseTestCase):
     def test_logout_protected(self):
         response = self.client.get('/logout', content_type = 'html/text',follow_redirects= True)
         self.assertEqual(response.status_code, 200)
-        self.assertIn('need to login', response.data)
+        self.assertIn('Please log in', response.data)
 
     def test_welcome_valid(self):
         response = self.client.get('/welcome', content_type = 'html/text')
@@ -77,7 +77,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_home_protected(self):
         response = self.client.get('/', content_type = 'html/text', follow_redirects=True)
-        self.assertIn('need to login', response.data)
+        self.assertIn('Please log in', response.data)
 
 
 if __name__== '__main__':

@@ -4,9 +4,9 @@
 
 from flask import flash, redirect, render_template, request, \
     url_for, Blueprint
-from project import app
+from project import db
 # from functools import wraps
-from form import LoginForm
+from form import LoginForm, RegisterForm
 from project.models import User, bcrypt
 from flask.ext.login import login_user, login_required, logout_user
 ################
@@ -21,17 +21,6 @@ users_blueprint = Blueprint(
 ##########################
 #### helper functions ####
 ##########################
-
-
-# def login_required(test):
-#     @wraps(test)
-#     def wrap(*args, **kwargs):
-#         if 'logged_in' in session:
-#             return test(*args, **kwargs)
-#         else:
-#             flash('You need to login first.')
-#             return redirect(url_for('users.login'))
-#     return wrap
 
 
 ################
@@ -70,3 +59,18 @@ def logout():
     # session.pop('logged_in', None)
     flash('log out successful.')
     return redirect(url_for('home.welcome'))
+
+@users_blueprint.route('/register/', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user = User(
+            name=form.username.data,
+            email=form.email.data,
+            password=form.password.data
+        )
+        db.session.add(user)
+        db.session.commit()
+        login_user(user)
+        return redirect(url_for('home.home'))
+    return render_template('register.html', form=form)

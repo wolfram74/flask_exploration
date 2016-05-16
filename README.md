@@ -21,3 +21,4 @@ if psycopg2 error re-emerges, try deactivating anaconda from bashprofile
 
 which python : informs which environment python is being pulled from, homebrew python (/usr/local/bin/python) is important.
 
+part24's tests are fairly superflous, but goes into some detail on context preservation for the purpose of testing.

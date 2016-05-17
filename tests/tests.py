@@ -2,6 +2,7 @@ import unittest
 from flask.ext.testing import TestCase
 from project import app, db
 from project.models import User, BlogPost
+from flask.ext.login import current_user
 
 class BaseTestCase(TestCase):
     def create_app(self):
@@ -79,6 +80,18 @@ class FlaskTestCase(BaseTestCase):
         response = self.client.get('/', content_type = 'html/text', follow_redirects=True)
         self.assertIn('Please log in', response.data)
 
+    def test_registration(self):
+        with self.client:
+            response = self.client.post(
+                '/register/',
+                data=dict(
+                    username="adam", email='test@place.com',
+                    password="dupers", confirm="dupers"),
+                follow_redirects=True
+            )
+            self.assertIn(b'Posts', response.data)
+            self.assertTrue(current_user.name == "adam")
+            self.assertTrue(current_user.is_active())
 
 if __name__== '__main__':
     unittest.main()
